@@ -1,0 +1,30 @@
+import cadquery as cq
+
+# Parameters
+block_w, block_d, block_h = 20, 20, 10
+gap = 1
+gate_thickness = 1
+platform_thickness = 2
+num_blocks = 4
+
+# Create assembly
+assembly = cq.Assembly()
+
+# Add blocks
+for i in range(num_blocks):
+    block = cq.Workplane("XY").box(block_w, block_d, block_h)
+    z_pos = i * (block_h + gap)
+    assembly.add(block, name=f"Block_{i+1}", loc=cq.Location(cq.Vector(0, 0, z_pos)))
+
+# Add gate plates
+for i in range(num_blocks - 1):
+    gate = cq.Workplane("XY").box(block_w, block_d, gate_thickness)
+    z_pos = (i + 1) * (block_h + gap) - (gap / 2)
+    assembly.add(gate, name=f"Gate_{i+1}", loc=cq.Location(cq.Vector(0, 0, z_pos)))
+
+# Add base platform
+platform = cq.Workplane("XY").box(block_w, block_d, platform_thickness)
+assembly.add(platform, name="Base_Platform", loc=cq.Location(cq.Vector(0, 0, -platform_thickness)))
+
+# Export as STEP
+assembly.save("vertical_block_separator.step", exportType='STEP')
